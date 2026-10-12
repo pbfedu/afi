@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonètica Catalana PRO</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-btn.active {
+            background-color: #2563eb;
+            color: white;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.3s ease-out forwards; }
+        @keyframes floatText {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-30px); }
+        }
+        .time-float-add { animation: floatText 0.8s ease-out forwards; color: #10b981; }
+        .time-float-sub { animation: floatText 0.8s ease-out forwards; color: #ef4444; }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(234, 179, 8, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(234, 179, 8, 0.8); }
+        }
+        .pro-glow { animation: pulseGlow 2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Modal Animació Inicial PRO -->
+    <div id="pro-welcome-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-pop">
+        <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 text-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border border-amber-400/30 pro-glow relative overflow-hidden">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl"></div>
+            <div class="w-20 h-20 bg-gradient-to-tr from-amber-400 to-amber-600 text-slate-950 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-lg">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Accés Oficial Verificat</span>
+            <h2 class="text-3xl font-extrabold mt-3 mb-2">Versió PRO Desbloquejada!</h2>
+            <p class="text-slate-300 text-sm mb-6">Gaudeix de vides il·limitades, mode contrarrellotge sense restriccions i assoliments complets.</p>
+            <button onclick="closeProModal()" class="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold py-3.5 px-6 rounded-2xl shadow-lg transition-all text-sm">
+                Començar a Practicar <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: T'has quedat sense vides -->
+    <div id="no-lives-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-pop">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border border-rose-200">
+            <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-3xl flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-heart-crack"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-900 mb-2">T'has quedat sense vides!</h2>
+            <p class="text-slate-600 text-xs mb-6">Has esgotat les teves 5 vides de prova. El teu progrés s'ha reiniciat a 0.</p>
+            <button onclick="resetAfterNoLives()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-2xl shadow-md transition-all text-sm">
+                Tornar a Intentar 🔄
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal per a Pregunta de Fallos -->
+    <div id="mistake-prompt-modal" class="hidden fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 animate-pop">
+        <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center shadow-xl border border-slate-200">
+            <div class="w-14 h-14 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">Fallos practicats!</h3>
+            <p class="text-slate-600 text-xs mt-1 mb-5">Has acumulat alguns errors recents. Vols seguir practicant o prefereixes revisar la taula?</p>
+            <div class="flex gap-2">
+                <button onclick="closeMistakePrompt()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-xs transition-all">
+                    Seguir normal
+                </button>
+                <button onclick="goToTableFromMistakes()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-xs transition-all">
+                    Anar a la Taula
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header / Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-black text-xl shadow-md">
+                    AFI
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-900 leading-tight">Fonètica Catalana <span id="header-badge-tag" class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold">PRO</span></h1>
+                    <p class="text-xs text-slate-500">Pràctica interactiva de sons</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-100 p-1 rounded-xl gap-1 text-xs sm:text-sm font-medium overflow-x-auto max-w-full">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn active px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-house"></i> Menú Principal
+                </button>
+                <button onclick="switchTab('mode1')" id="nav-mode1" class="nav-btn px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-ear-listen"></i> So ➔ Propietats
+                </button>
+                <button onclick="switchTab('mode2')" id="nav-mode2" class="nav-btn px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-keyboard"></i> Propietats ➔ So
+                </button>
+                <button onclick="switchTab('timeattack')" id="nav-timeattack" class="nav-btn px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-bolt text-amber-500"></i> Contrarrellotge
+                </button>
+                <button onclick="switchTab('table')" id="nav-table" class="nav-btn px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-table-list"></i> Taula
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- DASHBOARD / MENÚ PRINCIPAL -->
+        <div id="view-dashboard" class="space-y-6 animate-pop">
+            
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span id="dash-mode-tag" class="bg-blue-500/30 text-blue-200 border border-blue-400/30 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Versió PRO</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold" id="dash-level-title">Estudiant de Fonètica</h2>
+                        <p class="text-slate-300 text-sm mt-1">Domina tots els fonemes consonàntics catalans amb exercicis dinàmics.</p>
+                    </div>
+
+                    <div class="flex gap-4 bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center">
+                        <div>
+                            <span class="text-xs text-slate-300 uppercase block font-semibold">Acierts</span>
+                            <span id="dash-total-correct" class="text-2xl font-black text-emerald-400">0</span>
+                        </div>
+                        <div class="w-px bg-white/20"></div>
+                        <div>
+                            <span class="text-xs text-slate-300 uppercase block font-semibold">Precisió</span>
+                            <span id="dash-accuracy" class="text-2xl font-black text-blue-300">0%</span>
+                        </div>
+                        <div id="dash-badges-box" class="flex gap-4">
+                            <div class="w-px bg-white/20"></div>
+                            <div>
+                                <span class="text-xs text-slate-300 uppercase block font-semibold">Insignies</span>
+                                <span id="dash-badges-count" class="text-2xl font-black text-amber-300">0/6</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div onclick="switchTab('mode1')" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-md transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-ear-listen"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg group-hover:text-blue-600 transition-colors">Modi 1: So ➔ Propietats</h3>
+                    <p class="text-slate-500 text-xs mt-1">Identifica la sonoritat, mode i punt d'articulació a partir del símbol.</p>
+                </div>
+
+                <div onclick="switchTab('mode2')" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-indigo-500 hover:shadow-md transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">Modi 2: Propietats ➔ So</h3>
+                    <p class="text-slate-500 text-xs mt-1">Llegeix les descripcions fonètiques i escriu el símbol IPA amb el teclat.</p>
+                </div>
+
+                <div onclick="switchTab('timeattack')" class="bg-white rounded-2xl p-5 border border-slate-200 hover:border-amber-500 hover:shadow-md transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-lg group-hover:text-amber-600 transition-colors">Modi Contrarrellotge</h3>
+                    <p class="text-slate-500 text-xs mt-1">Demostra agilitat! +3s si encertes, -3s de penalització si falles.</p>
+                </div>
+            </div>
+
+            <div id="dashboard-extra-section"></div>
+
+            <div class="flex justify-end">
+                <button onclick="resetStatsExplicit()" class="text-xs text-slate-500 hover:text-slate-700 bg-slate-200/60 hover:bg-slate-200 px-3 py-2 rounded-xl transition-all font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrows-rotate"></i> Reiniciar Estadístiques
+                </button>
+            </div>
+
+        </div>
+
+        <!-- SCOREBOARD AMB VIDES (PER A PROVA) -->
+        <div id="practice-scoreboard" class="hidden bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mb-6 flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-6 text-sm">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                    <div>
+                        <span class="text-xs text-slate-400 block uppercase font-bold">Encerts</span>
+                        <span id="score-correct" class="font-bold text-slate-800 text-lg">0</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-circle-xmark text-rose-600 text-lg"></i>
+                    <div>
+                        <span class="text-xs text-slate-400 block uppercase font-bold">Errors</span>
+                        <span id="score-incorrect" class="font-bold text-slate-800 text-lg">0</span>
+                    </div>
+                </div>
+                <div class="h-8 w-px bg-slate-200"></div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-amber-500 text-lg"></i>
+                    <div>
+                        <span class="text-xs text-slate-400 block uppercase font-bold">Ratxa</span>
+                        <span id="score-streak" class="font-bold text-slate-800 text-lg">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vides (Només versió prova) -->
+            <div id="lives-display-container" class="flex items-center gap-2 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl text-rose-700 text-xs font-bold">
+                <i class="fa-solid fa-heart text-rose-500 text-sm"></i>
+                <span>Vides: <span id="lives-count">5</span>/5</span>
+            </div>
+        </div>
+
+        <!-- MODE 1 CONTAINER -->
+        <div id="view-mode1" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 animate-pop">
+            <div class="text-center mb-6">
+                <span class="inline-block bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                    <i class="fa-solid fa-ear-listen mr-1"></i> Mode 1
+                </span>
+                <p class="text-slate-600 text-sm">Observa el so i tria la sonoritat, mode i punt d'articulació correctes.</p>
+            </div>
+
+            <div class="flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-2xl p-6 mb-8 shadow-md relative">
+                <span class="text-xs uppercase tracking-wider opacity-80">Símbol Fonètic</span>
+                <div id="m1-symbol" class="text-6xl font-mono font-bold my-2">[p]</div>
+                <button onclick="toggleHint('m1')" class="text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full transition-all flex items-center gap-1">
+                    <i class="fa-regular fa-lightbulb"></i> Pista d'exemple
+                </button>
+                <span id="m1-hint-text" class="hidden text-sm italic opacity-90 mt-2">Exemple: pal</span>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">1. Sonoritat</label>
+                    <div id="m1-sonoritat-options" class="grid grid-cols-2 gap-3"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">2. Mode d'articulació</label>
+                    <div id="m1-mode-options" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-500 mb-2">3. Punt d'articulació</label>
+                    <div id="m1-punt-options" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex gap-3">
+                <button id="m1-submit-btn" onclick="checkMode1()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check"></i> Comprovar Resposta
+                </button>
+                <button id="m1-next-btn" onclick="nextMode1()" class="hidden flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    Següent Pregunta <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+
+            <div id="m1-feedback" class="hidden mt-4 p-4 rounded-xl text-center font-medium"></div>
+        </div>
+
+        <!-- MODE 2 CONTAINER -->
+        <div id="view-mode2" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 animate-pop">
+            <div class="text-center mb-6">
+                <span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                    <i class="fa-solid fa-keyboard mr-1"></i> Mode 2
+                </span>
+                <p class="text-slate-600 text-sm">A partir de les propietats, escriu el símbol utilitzant el teclat IPA.</p>
+            </div>
+
+            <div class="bg-slate-100 rounded-2xl p-6 mb-6 border border-slate-200">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div class="bg-white p-3 rounded-xl shadow-xs">
+                        <span class="text-xs text-slate-400 block uppercase font-semibold">Sonoritat</span>
+                        <span id="m2-prop-sonoritat" class="text-base font-bold text-slate-800">Sord</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-xs">
+                        <span class="text-xs text-slate-400 block uppercase font-semibold">Mode d'articulació</span>
+                        <span id="m2-prop-mode" class="text-base font-bold text-slate-800">Oclusiu</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl shadow-xs">
+                        <span class="text-xs text-slate-400 block uppercase font-semibold">Punt d'articulació</span>
+                        <span id="m2-prop-punt" class="text-base font-bold text-slate-800">Bilabial</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="max-w-md mx-auto space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase mb-2 text-center">Símbol Resultant</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="m2-user-input" readonly placeholder="[...]" class="w-full text-center text-3xl font-mono font-bold bg-slate-50 border-2 border-slate-300 rounded-2xl py-3 text-slate-800 focus:outline-none">
+                        <button onclick="clearM2Input()" class="px-4 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-semibold transition-all text-sm flex items-center justify-center">
+                            <i class="fa-solid fa-backspace"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200">
+                    <span class="text-xs text-slate-500 font-semibold block mb-2 text-center">Teclat Fonètic IPA</span>
+                    <div id="ipa-keyboard" class="grid grid-cols-6 gap-1.5"></div>
+                </div>
+
+                <div class="flex gap-3 pt-2">
+                    <button id="m2-submit-btn" onclick="checkMode2()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-check"></i> Comprovar Símbol
+                    </button>
+                    <button id="m2-next-btn" onclick="nextMode2()" class="hidden flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3.5 px-6 rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                        Següent Pregunta <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="m2-feedback" class="hidden mt-6 p-4 rounded-xl text-center font-medium max-w-md mx-auto"></div>
+        </div>
+
+        <!-- MODE CONTRARRELLOTGE -->
+        <div id="view-timeattack" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 animate-pop">
+            <div id="ta-start-screen" class="text-center py-8 space-y-4">
+                <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-inner">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Mode Contrarrellotge</h2>
+                <p id="ta-start-desc" class="text-slate-600 text-sm max-w-md mx-auto">
+                    Reps <b>30 segons</b> inicials. <span class="text-emerald-600 font-bold">+3s</span> per aciert | <span class="text-rose-600 font-bold">-3s</span> per error!
+                </p>
+                <div id="ta-btn-container">
+                    <button onclick="startTimeAttackGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-2xl shadow-lg transition-all text-base transform hover:scale-105">
+                        Començar Desafiament <i class="fa-solid fa-play ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="ta-game-screen" class="hidden space-y-6">
+                <div class="flex justify-between items-center bg-slate-900 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-stopwatch text-amber-400 text-2xl"></i>
+                        <div>
+                            <span class="text-xs text-slate-400 uppercase font-semibold block">Temps Restant</span>
+                            <span id="ta-timer" class="text-2xl font-black text-amber-400">30s</span>
+                        </div>
+                    </div>
+                    <div id="ta-time-float" class="absolute left-1/2 top-2 font-black text-xl pointer-events-none"></div>
+                    <div class="text-right">
+                        <span class="text-xs text-slate-400 uppercase font-semibold block">Encerts</span>
+                        <span id="ta-score" class="text-2xl font-black text-emerald-400">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-200 text-center">
+                    <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Identifica el so:</span>
+                    <div class="flex justify-center gap-3 text-slate-800 font-bold text-sm sm:text-base mt-2">
+                        <span id="ta-prop-sonoritat" class="bg-white border px-3 py-1 rounded-lg">Sord</span>
+                        <span id="ta-prop-mode" class="bg-white border px-3 py-1 rounded-lg">Oclusiu</span>
+                        <span id="ta-prop-punt" class="bg-white border px-3 py-1 rounded-lg">Bilabial</span>
+                    </div>
+                </div>
+
+                <div id="ta-options-grid" class="grid grid-cols-2 gap-3"></div>
+            </div>
+
+            <div id="ta-results-screen" class="hidden text-center py-8 space-y-4">
+                <div class="w-20 h-20 bg-slate-100 text-slate-800 rounded-3xl flex items-center justify-center text-4xl mx-auto">
+                    <i class="fa-solid fa-flag-checkered"></i>
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-900">Temps Esgotat!</h2>
+                <div class="text-slate-600 text-sm">
+                    Has aconseguit <span id="ta-final-score" class="text-2xl font-black text-amber-500">0</span> encerts.
+                </div>
+                <div class="pt-2">
+                    <button onclick="startTimeAttackGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all text-sm">
+                        Tornar a Intentar <i class="fa-solid fa-rotate-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAULA DE REFERÈNCIA -->
+        <div id="view-table" class="hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 animate-pop">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-purple-600"></i> Taula Oficial de Sons Consonàntics
+                    </h2>
+                    <p class="text-slate-500 text-xs mt-0.5">Consulta la totalitat dels fonemes consonàntics del català.</p>
+                </div>
+
+                <div class="relative w-full md:w-64">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="table-search" oninput="filterReferenceTable()" placeholder="Cercar per so o exemple..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-purple-500">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                            <th class="p-3">Símbol IPA</th>
+                            <th class="p-3">Sonoritat</th>
+                            <th class="p-3">Mode d'articulació</th>
+                            <th class="p-3">Punt d'articulació</th>
+                            <th class="p-3">Exemples de Mots</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reference-table-body" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+        Fonètica Catalana &bull; L'aplicació pot contenir errors.
+    </footer>
+
+    <script>
+        const consonantsData = [
+            { symbol: '[p]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Bilabial', examples: 'pal' },
+            { symbol: '[b]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Bilabial', examples: 'bata' },
+            { symbol: '[β]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Bilabial', examples: 'sabata, sobre' },
+            { symbol: '[m]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Bilabial', examples: 'mà' },
+            { symbol: '[f]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Labiodental', examples: 'foc' },
+            { symbol: '[v]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Labiodental', examples: 'val' },
+            { symbol: '[ɱ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Labiodental', examples: 'inflar, àmfora' },
+            { symbol: '[t]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Dental', examples: 'toc' },
+            { symbol: '[d]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Dental', examples: 'dau' },
+            { symbol: '[ð]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Dental', examples: 'odi, quadre' },
+            { symbol: '[s]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Alveolar', examples: 'sac, cel, cançó' },
+            { symbol: '[z]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Alveolar', examples: 'casa, zero, onze' },
+            { symbol: '[ts]', sonoritat: 'Sord', mode: 'Africat', punt: 'Alveolar', examples: 'potser' },
+            { symbol: '[dz]', sonoritat: 'Sonor', mode: 'Africat', punt: 'Alveolar', examples: 'dotze' },
+            { symbol: '[l]', sonoritat: 'Sonor', mode: 'Lateral', punt: 'Alveolar', examples: 'litre' },
+            { symbol: '[ɾ]', sonoritat: 'Sonor', mode: 'Bategant', punt: 'Alveolar', examples: 'cara, pebre' },
+            { symbol: '[r]', sonoritat: 'Sonor', mode: 'Vibrant', punt: 'Alveolar', examples: 'rosa, arròs, arma' },
+            { symbol: '[n]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Alveolar', examples: 'nen' },
+            { symbol: '[ʃ]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Palatal', examples: 'xec, peix' },
+            { symbol: '[ʒ]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Palatal', examples: 'joc, gent' },
+            { symbol: '[tʃ]', sonoritat: 'Sord', mode: 'Africat', punt: 'Palatal', examples: 'cotxo, raig' },
+            { symbol: '[dʒ]', sonoritat: 'Sonor', mode: 'Africat', punt: 'Palatal', examples: 'formatge, platja' },
+            { symbol: '[j]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Palatal', examples: 'iode, mai, feien' },
+            { symbol: '[ʎ]', sonoritat: 'Sonor', mode: 'Lateral', punt: 'Palatal', examples: 'llac, coll, rella' },
+            { symbol: '[ɲ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Palatal', examples: 'nyap, any, bunyol' },
+            { symbol: '[k]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Velar', examples: 'casa, queixa' },
+            { symbol: '[g]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Velar', examples: 'gota, guix, angle' },
+            { symbol: '[ɣ]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Velar', examples: 'farigola, regle' },
+            { symbol: '[w]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Velar', examples: 'teula, quadre, seuen' },
+            { symbol: '[ŋ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Velar', examples: 'sang, angle, conco' }
+        ];
+
+        const sonoritatList = ['Sord', 'Sonor'];
+        const modeList = ['Oclusiu', 'Fricatiu', 'Africat', 'Aproximant', 'Lateral', 'Bategant', 'Vibrant', 'Nasal'];
+        const puntList = ['Bilabial', 'Labiodental', 'Dental', 'Alveolar', 'Palatal', 'Velar'];
+
+        const badgesConfig = [
+            { id: 'first_win', name: 'Primer Pas', icon: 'fa-seedling', desc: '1r encert aconseguit', check: s => s.totalCorrect >= 1 },
+            { id: 'streak_5', name: 'Ràpid i Segur', icon: 'fa-fire', desc: 'Ratxa de 5 encerts', check: s => s.maxStreak >= 5 },
+            { id: 'streak_15', name: 'Imparable', icon: 'fa-bolt', desc: 'Ratxa de 15 encerts', check: s => s.maxStreak >= 15 },
+            { id: 'accuracy_master', name: 'Precisió d\'Or', icon: 'fa-bullseye', desc: '20+ encerts amb >80% precisió', check: s => s.totalCorrect >= 20 && (s.totalCorrect/(s.totalCorrect+s.totalIncorrect)) >= 0.8 },
+            { id: 'time_master', name: 'Mestre del Temps', icon: 'fa-stopwatch', desc: '10+ punts en contrarrellotge', check: s => s.maxTimeScore >= 10 },
+            { id: 'phonetic_god', name: 'Mestre Fonètic', icon: 'fa-crown', desc: '50 acierts totals', check: s => s.totalCorrect >= 50 }
+        ];
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPro = urlParams.get('pro') === 'true';
+
+        let stats = {
+            totalCorrect: 0,
+            totalIncorrect: 0,
+            streak: 0,
+            maxStreak: 0,
+            maxTimeScore: 0,
+            sessionErrorsSincePrompt: 0,
+            lives: 5,
+            unlockedBadges: []
+        };
+
+        let currentTab = 'dashboard';
+        let timeAttackPlayedThisSession = false;
+
+        let m1CurrentItem = null;
+        let m1Selected = { sonoritat: null, mode: null, punt: null };
+        let m2CurrentItem = null;
+        let m2Answered = false;
+
+        let taTimer = null;
+        let taTimeLeft = 30;
+        let taScore = 0;
+        let taCurrentItem = null;
+
+        window.onload = function() {
+            if (isPro) {
+                loadStats();
+                document.getElementById('pro-welcome-modal').classList.remove('hidden');
+            } else {
+                // Versió de prova: comença de 0 sense carregar localStorage persistent
+                stats.lives = 5;
+            }
+
+            initMode1UI();
+            initMode2Keyboard();
+            initReferenceTable();
+            setupProModeUI();
+            updateDashboard();
+            updateStatsDisplay();
+        };
+
+        function closeProModal() {
+            document.getElementById('pro-welcome-modal').classList.add('hidden');
+        }
+
+        function setupProModeUI() {
+            const headerTag = document.getElementById('header-badge-tag');
+            const dashTag = document.getElementById('dash-mode-tag');
+            const badgesBox = document.getElementById('dash-badges-box');
+            const livesContainer = document.getElementById('lives-display-container');
+
+            if (isPro) {
+                headerTag.className = 'text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold';
+                headerTag.innerText = 'PRO';
+                dashTag.className = 'bg-amber-500/30 text-amber-200 border border-amber-400/30 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider';
+                dashTag.innerText = 'Versió PRO Oficial';
+                badgesBox.classList.remove('hidden');
+                livesContainer.classList.add('hidden'); // PRO no té límit de vides
+            } else {
+                headerTag.className = 'text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full font-bold';
+                headerTag.innerText = 'PROVA';
+                dashTag.className = 'bg-blue-500/30 text-blue-200 border border-blue-400/30 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider';
+                dashTag.innerText = 'Versió de Prova (5 vides)';
+                badgesBox.classList.add('hidden');
+                livesContainer.classList.remove('hidden');
+            }
+        }
+
+        function switchTab(tabId) {
+            currentTab = tabId;
+            const tabs = ['dashboard', 'mode1', 'mode2', 'timeattack', 'table'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`nav-${t}`);
+                const view = document.getElementById(`view-${t}`);
+                if (t === tabId) {
+                    btn?.classList.add('active');
+                    btn?.classList.remove('text-slate-600');
+                    view?.classList.remove('hidden');
+                } else {
+                    btn?.classList.remove('active');
+                    btn?.classList.add('text-slate-600');
+                    view?.classList.add('hidden');
+                }
+            });
+
+            const scoreboard = document.getElementById('practice-scoreboard');
+            if (tabId === 'mode1' || tabId === 'mode2') {
+                scoreboard.classList.remove('hidden');
+            } else {
+                scoreboard.classList.add('hidden');
+            }
+
+            if (tabId !== 'timeattack' && taTimer) {
+                clearInterval(taTimer);
+                taTimer = null;
+            }
+
+            if (tabId === 'dashboard') updateDashboard();
+            if (tabId === 'mode1') startMode1();
+            if (tabId === 'mode2') startMode2();
+            if (tabId === 'timeattack') checkTimeAttackStatus();
+        }
+
+        function checkTimeAttackStatus() {
+            const desc = document.getElementById('ta-start-desc');
+            const btnContainer = document.getElementById('ta-btn-container');
+
+            if (!isPro && timeAttackPlayedThisSession) {
+                desc.innerHTML = `<span class="text-rose-600 font-bold">Has exhaurit l'intent del Contrarrellotge en la versió de prova.</span><br>Desbloqueja amb PRO per jugar tantes vegades com vulguis!`;
+                btnContainer.innerHTML = `
+                    <button onclick="showToast('Afegeix ?pro=true a la URL per desbloquejar PRO!')" class="bg-slate-300 text-slate-700 font-bold py-3.5 px-8 rounded-2xl shadow-sm text-base cursor-not-allowed">
+                        Desbloqueja amb PRO 🔒
+                    </button>
+                `;
+            } else {
+                desc.innerHTML = `Reps <b>30 segons</b> inicials. <span class="text-emerald-600 font-bold">+3s</span> per aciert | <span class="text-rose-600 font-bold">-3s</span> per error!`;
+                btnContainer.innerHTML = `
+                    <button onclick="startTimeAttackGame()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 px-8 rounded-2xl shadow-lg transition-all text-base transform hover:scale-105">
+                        Començar Desafiament <i class="fa-solid fa-play ml-1"></i>
+                    </button>
+                `;
+            }
+        }
+
+        function loadStats() {
+            const saved = localStorage.getItem('cat_phonetics_pro_data');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    stats = { ...stats, ...parsed };
+                } catch(e) {}
+            }
+        }
+
+        function saveStats() {
+            if (isPro) {
+                localStorage.setItem('cat_phonetics_pro_data', JSON.stringify(stats));
+                checkBadges();
+            }
+        }
+
+        function resetStatsExplicit() {
+            stats.totalCorrect = 0;
+            stats.totalIncorrect = 0;
+            stats.streak = 0;
+            stats.sessionErrorsSincePrompt = 0;
+            stats.lives = 5;
+            if (isPro) {
+                stats.unlockedBadges = [];
+                stats.maxStreak = 0;
+                stats.maxTimeScore = 0;
+            }
+            timeAttackPlayedThisSession = false;
+            saveStats();
+            updateStatsDisplay();
+            updateDashboard();
+            showToast('Estadístiques reiniciades correctament.');
+        }
+
+        function resetAfterNoLives() {
+            document.getElementById('no-lives-modal').classList.add('hidden');
+            stats.totalCorrect = 0;
+            stats.totalIncorrect = 0;
+            stats.streak = 0;
+            stats.lives = 5;
+            stats.sessionErrorsSincePrompt = 0;
+            updateStatsDisplay();
+            updateDashboard();
+            switchTab('dashboard');
+        }
+
+        function recordResult(isCorrect) {
+            if (isCorrect) {
+                stats.totalCorrect++;
+                stats.streak++;
+                if (stats.streak > stats.maxStreak) stats.maxStreak = stats.streak;
+            } else {
+                stats.totalIncorrect++;
+                stats.streak = 0;
+                stats.sessionErrorsSincePrompt++;
+
+                if (!isPro) {
+                    stats.lives--;
+                    updateStatsDisplay();
+                    if (stats.lives <= 0) {
+                        document.getElementById('no-lives-modal').classList.remove('hidden');
+                        return;
+                    }
+                }
+
+                if (stats.sessionErrorsSincePrompt >= 3) {
+                    stats.sessionErrorsSincePrompt = 0;
+                    document.getElementById('mistake-prompt-modal').classList.remove('hidden');
+                }
+            }
+            saveStats();
+            updateStatsDisplay();
+        }
+
+        function closeMistakePrompt() {
+            document.getElementById('mistake-prompt-modal').classList.add('hidden');
+        }
+
+        function goToTableFromMistakes() {
+            document.getElementById('mistake-prompt-modal').classList.add('hidden');
+            switchTab('table');
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('score-correct').innerText = stats.totalCorrect;
+            document.getElementById('score-incorrect').innerText = stats.totalIncorrect;
+            document.getElementById('score-streak').innerText = stats.streak + ' 🔥';
+            document.getElementById('lives-count').innerText = stats.lives;
+        }
+
+        function checkBadges() {
+            badgesConfig.forEach(b => {
+                if (!stats.unlockedBadges.includes(b.id) && b.check(stats)) {
+                    stats.unlockedBadges.push(b.id);
+                    showToast(`🏆 Insignia Desbloquejada: ${b.name}!`);
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const total = stats.totalCorrect + stats.totalIncorrect;
+            const accuracy = total > 0 ? Math.round((stats.totalCorrect / total) * 100) : 0;
+
+            document.getElementById('dash-total-correct').innerText = stats.totalCorrect;
+            document.getElementById('dash-accuracy').innerText = accuracy + '%';
+            document.getElementById('dash-badges-count').innerText = `${stats.unlockedBadges.length}/${badgesConfig.length}`;
+
+            const levelTitle = document.getElementById('dash-level-title');
+            if (stats.totalCorrect >= 50) levelTitle.innerText = ' Mestre de Fonètica Catalana';
+            else if (stats.totalCorrect >= 20) levelTitle.innerText = ' Estudiant Avançat';
+            else levelTitle.innerText = ' Estudiant Inicial';
+
+            const extraSection = document.getElementById('dashboard-extra-section');
+            if (isPro) {
+                let html = `
+                    <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-900 flex items-center gap-2">
+                                <i class="fa-solid fa-award text-amber-500"></i> Insignies i Assoliments PRO
+                            </h3>
+                            <span class="text-xs text-slate-400">Permanents</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                `;
+                badgesConfig.forEach(b => {
+                    const isUnlocked = stats.unlockedBadges.includes(b.id);
+                    html += `
+                        <div class="p-3 rounded-xl border text-center transition-all ${isUnlocked ? 'bg-amber-50/50 border-amber-200 text-slate-800' : 'bg-slate-50 border-slate-200 opacity-40'}">
+                            <div class="text-xl mb-1 ${isUnlocked ? 'text-amber-500' : 'text-slate-400'}"><i class="fa-solid ${b.icon}"></i></div>
+                            <div class="text-xs font-bold leading-tight">${b.name}</div>
+                            <div class="text-[10px] text-slate-500 mt-0.5">${b.desc}</div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                extraSection.innerHTML = html;
+            } else {
+                extraSection.innerHTML = `
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-6 text-center">
+                        <i class="fa-solid fa-lock text-blue-600 text-2xl mb-2"></i>
+                        <h3 class="font-bold text-slate-900 text-base">Vols vides il·limitades, insignies i accés complet?</h3>
+                        <p class="text-slate-600 text-xs mt-1 mb-4">Estàs jugant amb 5 vides a la versió de prova.</p>
+                        <button onclick="showToast('Afegeix ?pro=true al final de la URL del navegador')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition-all shadow-sm">
+                            Activar Versió PRO
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        // --- MODE 1 LOGIC ---
+        function initMode1UI() {
+            const renderGroup = (containerId, list, category) => {
+                const c = document.getElementById(containerId);
+                c.innerHTML = '';
+                list.forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'py-2.5 px-3 rounded-xl border-2 border-slate-200 font-medium text-slate-700 hover:border-blue-400 hover:bg-blue-50/50 transition-all text-xs sm:text-sm';
+                    btn.innerText = item;
+                    btn.onclick = () => selectM1Option(category, item, btn);
+                    c.appendChild(btn);
+                });
+            };
+
+            renderGroup('m1-sonoritat-options', sonoritatList, 'sonoritat');
+            renderGroup('m1-mode-options', modeList, 'mode');
+            renderGroup('m1-punt-options', puntList, 'punt');
+        }
+
+        function selectM1Option(category, value, btnElement) {
+            m1Selected[category] = value;
+            Array.from(btnElement.parentElement.children).forEach(child => {
+                child.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700', 'shadow-sm');
+                child.classList.add('border-slate-200', 'text-slate-700');
+            });
+            btnElement.classList.remove('border-slate-200', 'text-slate-700');
+            btnElement.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-700', 'shadow-sm');
+        }
+
+        function startMode1() {
+            m1Selected = { sonoritat: null, mode: null, punt: null };
+            document.getElementById('m1-feedback').classList.add('hidden');
+            document.getElementById('m1-submit-btn').classList.remove('hidden');
+            document.getElementById('m1-next-btn').classList.add('hidden');
+            document.getElementById('m1-hint-text').classList.add('hidden');
+
+            ['m1-sonoritat-options', 'm1-mode-options', 'm1-punt-options'].forEach(id => {
+                Array.from(document.getElementById(id).children).forEach(child => {
+                    child.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-700', 'shadow-sm', 'border-emerald-500', 'border-rose-500');
+                    child.classList.add('border-slate-200', 'text-slate-700');
+                    child.disabled = false;
+                });
+            });
+
+            m1CurrentItem = consonantsData[Math.floor(Math.random() * consonantsData.length)];
+            document.getElementById('m1-symbol').innerText = m1CurrentItem.symbol;
+            document.getElementById('m1-hint-text').innerText = 'Exemple: ' + m1CurrentItem.examples;
+        }
+
+        function toggleHint(mode) {
+            document.getElementById(`${mode}-hint-text`).classList.toggle('hidden');
+        }
+
+        function checkMode1() {
+            if (!m1Selected.sonoritat || !m1Selected.mode || !m1Selected.punt) {
+                showToast('Selecciona una opció per a cada categoria.');
+                return;
+            }
+
+            const isCorrect = (
+                m1Selected.sonoritat === m1CurrentItem.sonoritat &&
+                m1Selected.mode === m1CurrentItem.mode &&
+                m1Selected.punt === m1CurrentItem.punt
+            );
+
+            recordResult(isCorrect);
+            const feedbackEl = document.getElementById('m1-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-center font-medium bg-emerald-50 text-emerald-800 border border-emerald-200';
+                feedbackEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Correcte! Molt bon treball.';
+            } else {
+                feedbackEl.className = 'mt-4 p-4 rounded-xl text-center font-medium bg-rose-50 text-rose-800 border border-rose-200';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Incorrecte. La resposta era: <b>${m1CurrentItem.sonoritat}</b>, <b>${m1CurrentItem.mode}</b>, <b>${m1CurrentItem.punt}</b>`;
+            }
+
+            document.getElementById('m1-submit-btn').classList.add('hidden');
+            document.getElementById('m1-next-btn').classList.remove('hidden');
+        }
+
+        function nextMode1() {
+            startMode1();
+        }
+
+        // --- MODE 2 LOGIC ---
+        const ipaKeys = ['[', ']', 'p', 'b', 'β', 'm', 'f', 'v', 'ɱ', 't', 'd', 'ð', 's', 'z', 'ts', 'dz', 'l', 'ɾ', 'r', 'n', 'ʃ', 'ʒ', 'tʃ', 'dʒ', 'j', 'ʎ', 'ɲ', 'k', 'g', 'ɣ', 'w', 'ŋ'];
+
+        function initMode2Keyboard() {
+            const container = document.getElementById('ipa-keyboard');
+            container.innerHTML = '';
+            ipaKeys.forEach(key => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'bg-white hover:bg-indigo-50 border border-slate-200 font-mono font-bold text-base text-slate-800 py-2 rounded-lg shadow-xs transition-all active:scale-95';
+                btn.innerText = key;
+                btn.onclick = () => appendToM2Input(key);
+                container.appendChild(btn);
+            });
+        }
+
+        function appendToM2Input(char) {
+            if (m2Answered) return;
+            document.getElementById('m2-user-input').value += char;
+        }
+
+        function clearM2Input() {
+            if (m2Answered) return;
+            document.getElementById('m2-user-input').value = '';
+        }
+
+        function startMode2() {
+            m2Answered = false;
+            document.getElementById('m2-user-input').value = '';
+            document.getElementById('m2-feedback').classList.add('hidden');
+            document.getElementById('m2-submit-btn').classList.remove('hidden');
+            document.getElementById('m2-next-btn').classList.add('hidden');
+
+            m2CurrentItem = consonantsData[Math.floor(Math.random() * consonantsData.length)];
+            document.getElementById('m2-prop-sonoritat').innerText = m2CurrentItem.sonoritat;
+            document.getElementById('m2-prop-mode').innerText = m2CurrentItem.mode;
+            document.getElementById('m2-prop-punt').innerText = m2CurrentItem.punt;
+        }
+
+        function checkMode2() {
+            if (m2Answered) return;
+            const userVal = document.getElementById('m2-user-input').value.trim();
+            if (!userVal) {
+                showToast('Introdueix un símbol amb el teclat.');
+                return;
+            }
+
+            m2Answered = true;
+            const isCorrect = (userVal === m2CurrentItem.symbol);
+            recordResult(isCorrect);
+
+            const feedbackEl = document.getElementById('m2-feedback');
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackEl.className = 'mt-6 p-4 rounded-xl text-center font-medium bg-emerald-50 text-emerald-800 border border-emerald-200';
+                feedbackEl.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Correcte! Excel·lent domini del símbol.';
+            } else {
+                feedbackEl.className = 'mt-6 p-4 rounded-xl text-center font-medium bg-rose-50 text-rose-800 border border-rose-200';
+                feedbackEl.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1"></i> Incorrecte. El so correcte era <b>${m2CurrentItem.symbol}</b> (${m2CurrentItem.examples}).`;
+            }
+
+            document.getElementById('m2-submit-btn').classList.add('hidden');
+            document.getElementById('m2-next-btn').classList.remove('hidden');
+        }
+
+        function nextMode2() {
+            startMode2();
+        }
+
+        // --- MODE CONTRARRELLOTGE ---
+        function startTimeAttackGame() {
+            if (!isPro && timeAttackPlayedThisSession) {
+                showToast("Mode contrarrellotge exhaurit en versió de prova.");
+                return;
+            }
+
+            document.getElementById('ta-start-screen').classList.add('hidden');
+            document.getElementById('ta-results-screen').classList.add('hidden');
+            document.getElementById('ta-game-screen').classList.remove('hidden');
+
+            taTimeLeft = 30;
+            taScore = 0;
+            updateTimeAttackHeader();
+
+            if (taTimer) clearInterval(taTimer);
+            taTimer = setInterval(() => {
+                taTimeLeft--;
+                updateTimeAttackHeader();
+                if (taTimeLeft <= 0) {
+                    endTimeAttackGame();
+                }
+            }, 1000);
+
+            nextTimeAttackQuestion();
+        }
+
+        function updateTimeAttackHeader() {
+            document.getElementById('ta-timer').innerText = Math.max(0, taTimeLeft) + 's';
+            document.getElementById('ta-score').innerText = taScore;
+        }
+
+        function nextTimeAttackQuestion() {
+            taCurrentItem = consonantsData[Math.floor(Math.random() * consonantsData.length)];
+            document.getElementById('ta-prop-sonoritat').innerText = taCurrentItem.sonoritat;
+            document.getElementById('ta-prop-mode').innerText = taCurrentItem.mode;
+            document.getElementById('ta-prop-punt').innerText = taCurrentItem.punt;
+
+            let options = [taCurrentItem.symbol];
+            while (options.length < 4) {
+                const randomSym = consonantsData[Math.floor(Math.random() * consonantsData.length)].symbol;
+                if (!options.includes(randomSym)) options.push(randomSym);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const grid = document.getElementById('ta-options-grid');
+            grid.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-slate-100 hover:bg-amber-500 hover:text-white font-mono font-bold text-2xl py-4 rounded-xl border border-slate-200 transition-all active:scale-95';
+                btn.innerText = opt;
+                btn.onclick = () => answerTimeAttack(opt);
+                grid.appendChild(btn);
+            });
+        }
+
+        function answerTimeAttack(selectedSymbol) {
+            const isCorrect = (selectedSymbol === taCurrentItem.symbol);
+            const floatEl = document.getElementById('ta-time-float');
+
+            if (isCorrect) {
+                taScore++;
+                taTimeLeft += 3;
+                floatEl.className = 'absolute left-1/2 top-2 font-black text-xl pointer-events-none time-float-add';
+                floatEl.innerText = '+3s';
+            } else {
+                taTimeLeft = Math.max(0, taTimeLeft - 3);
+                floatEl.className = 'absolute left-1/2 top-2 font-black text-xl pointer-events-none time-float-sub';
+                floatEl.innerText = '-3s';
+            }
+
+            floatEl.remove();
+            document.querySelector('#view-timeattack .relative').appendChild(floatEl);
+
+            updateTimeAttackHeader();
+
+            if (taTimeLeft <= 0) {
+                endTimeAttackGame();
+            } else {
+                nextTimeAttackQuestion();
+            }
+        }
+
+        function endTimeAttackGame() {
+            clearInterval(taTimer);
+            taTimer = null;
+            timeAttackPlayedThisSession = true;
+
+            if (taScore > stats.maxTimeScore) {
+                stats.maxTimeScore = taScore;
+                saveStats();
+            }
+
+            document.getElementById('ta-game-screen').classList.add('hidden');
+            document.getElementById('ta-results-screen').classList.remove('hidden');
+            document.getElementById('ta-final-score').innerText = taScore;
+        }
+
+        // --- TAULA DE REFERÈNCIA ---
+        function initReferenceTable() {
+            renderReferenceTable(consonantsData);
+        }
+
+        function renderReferenceTable(data) {
+            const tbody = document.getElementById('reference-table-body');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-3 font-mono font-bold text-blue-600 text-base">${item.symbol}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${item.sonoritat === 'Sord' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'}">
+                            ${item.sonoritat}
+                        </span>
+                    </td>
+                    <td class="p-3 text-slate-700 font-medium">${item.mode}</td>
+                    <td class="p-3 text-slate-700">${item.punt}</td>
+                    <td class="p-3 text-slate-500 italic">${item.examples}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterReferenceTable() {
+            const query = document.getElementById('table-search').value.toLowerCase().trim();
+            const filtered = consonantsData.filter(c => 
+                c.symbol.toLowerCase().includes(query) ||
+                c.examples.toLowerCase().includes(query) ||
+                c.mode.toLowerCase().includes(query) ||
+                c.punt.toLowerCase().includes(query)
+            );
+            renderReferenceTable(filtered);
+        }
+
+        function showToast(msg) {
+            const existing = document.getElementById('toast-msg');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'toast-msg';
+            toast.className = 'fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white px-5 py-2.5 rounded-2xl shadow-xl z-50 text-xs font-semibold animate-pop flex items-center gap-2';
+            toast.innerHTML = `<i class="fa-solid fa-circle-info text-blue-400"></i> ${msg}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
