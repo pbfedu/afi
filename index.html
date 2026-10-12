@@ -531,7 +531,7 @@
                 headerTag.className = 'text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold';
                 headerTag.innerText = 'PRO';
                 dashTag.className = 'bg-amber-500/30 text-amber-200 border border-amber-400/30 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider';
-                dashTag.innerText = 'Versió PRO Oficial';
+                dashTag.innerText = 'Versió PRO';
                 badgesBox.classList.remove('hidden');
                 livesContainer.classList.add('hidden'); // PRO no té límit de vides
             } else {
@@ -587,7 +587,7 @@
             if (!isPro && timeAttackPlayedThisSession) {
                 desc.innerHTML = `<span class="text-rose-600 font-bold">Has exhaurit l'intent del Contrarrellotge en la versió de prova.</span><br>Desbloqueja amb PRO per jugar tantes vegades com vulguis!`;
                 btnContainer.innerHTML = `
-                    <button onclick="showToast('Afegeix ?pro=true a la URL per desbloquejar PRO!')" class="bg-slate-300 text-slate-700 font-bold py-3.5 px-8 rounded-2xl shadow-sm text-base cursor-not-allowed">
+                    <button onclick="showToast('Contacta amb l'administrador del lloc per desbloquejar PRO!')" class="bg-slate-300 text-slate-700 font-bold py-3.5 px-8 rounded-2xl shadow-sm text-base cursor-not-allowed">
                         Desbloqueja amb PRO 🔒
                     </button>
                 `;
