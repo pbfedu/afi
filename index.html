@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ca" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fonètica Catalana - Duolingo Style</title>
+    
+    <!-- Fonts: Fredoka & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Fredoka', 'sans-serif'],
+                    },
+                    colors: {
+                        duoGreen: '#58cc02', duoGreenDark: '#46a302',
+                        duoBlue: '#1cb0f6', duoBlueDark: '#1899d6',
+                        duoOrange: '#ff9600', duoOrangeDark: '#e08400',
+                        duoPurple: '#ce82ff', duoPurpleDark: '#b060e0',
+                        duoRed: '#ff4b4b', duoRedDark: '#ea2b2b',
+                        duoYellow: '#ffc800', duoYellowDark: '#e0b000',
+                        duoBgSuccess: '#d7ffb8', duoTextSuccess: '#58a700',
+                        duoBgError: '#ffdfe0', duoTextError: '#ea2b2b',
+                    },
+                    boxShadow: {
+                        'duo-3d': '0 6px 0 0 rgba(0, 0, 0, 0.1)',
+                        'btn-green': '0 4px 0 0 #46a302',
+                        'btn-blue': '0 4px 0 0 #1899d6',
+                        'btn-orange': '0 4px 0 0 #e08400',
+                        'btn-red': '0 4px 0 0 #ea2b2b',
+                        'btn-yellow': '0 4px 0 0 #e0b000',
+                        'btn-slate': '0 4px 0 0 #cbd5e1',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #ffffff;
+            color: #1E293B;
+            background-image: radial-gradient(#f1f5f9 2px, transparent 2px);
+            background-size: 24px 24px;
+            overflow-x: hidden;
+        }
+
+        /* Amagar scrollbar als menús però permetre scroll tàctil */
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .duo-pressable:active:not(:disabled) {
+            transform: translateY(4px) !important;
+            box-shadow: none !important;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+        }
+        .animate-float-up { animation: floatUp 1s ease-out forwards; }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-8px, 4px) rotate(-2deg); }
+            40% { transform: translate(8px, -4px) rotate(2deg); }
+            60% { transform: translate(-4px, -2px) rotate(-1deg); }
+            80% { transform: translate(4px, 2px) rotate(1deg); }
+        }
+        .screen-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+
+        .nav-btn.active {
+            background-color: #1cb0f6;
+            color: white;
+            border-color: #1899d6;
+            border-bottom-width: 4px;
+            transform: translateY(0);
+        }
+        
+        .bottom-sheet {
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .bottom-sheet.open {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body id="app-body" class="min-h-screen flex flex-col selection:bg-duoGreen selection:text-white">
+
+    <!-- MODAL NOM INICIAL -->
+    <div id="name-modal" class="hidden fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-[32px] p-8 max-w-sm w-full text-center border-4 border-slate-200 animate-pop">
+            <div class="w-24 h-24 bg-duoGreen text-white rounded-full flex items-center justify-center text-5xl mx-auto mb-6 shadow-btn-green border-4 border-white">
+                <i class="fa-solid fa-face-smile-wink"></i>
+            </div>
+            <h2 class="text-3xl font-display font-black text-slate-800 mb-2">Com et dius?</h2>
+            <p class="text-slate-500 font-bold text-sm mb-6">Així guardarem el teu progrés i insígnies.</p>
+            <input type="text" id="name-input" placeholder="Escriu el teu nom..." class="w-full bg-slate-100 border-4 border-slate-200 rounded-[20px] p-4 text-center font-display font-black text-xl mb-6 focus:border-duoBlue focus:bg-white outline-none transition-colors">
+            <button onclick="saveName()" class="w-full bg-duoGreen text-white font-display font-black text-xl py-4 rounded-[20px] border-x-2 border-t-2 border-b-[6px] border-black/10 shadow-btn-green duo-pressable">
+                Començar a Jugar
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal per a Pregunta de Fallos -->
+    <div id="mistake-prompt-modal" class="hidden fixed inset-0 z-50 bg-slate-900/80 flex items-center justify-center p-4 animate-pop">
+        <div class="bg-white rounded-[32px] p-6 max-w-sm w-full text-center shadow-xl border-[3px] border-slate-200">
+            <div class="w-16 h-16 bg-rose-100 text-duoRed rounded-full flex items-center justify-center text-3xl mx-auto mb-4 border-2 border-rose-200">
+                <i class="fa-solid fa-book-open"></i>
+            </div>
+            <h3 class="text-2xl font-display font-black text-slate-800">Caldria repassar?</h3>
+            <p class="text-slate-500 font-bold text-sm mt-2 mb-6">T'està costant una mica. Pots consultar la taula de sons quan vulguis.</p>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('mistake-prompt-modal').classList.add('hidden'); playSound('pop')" class="flex-1 bg-slate-100 text-slate-500 font-display font-black py-3 rounded-[16px] border-b-[4px] border-slate-200 duo-pressable text-sm">
+                    Seguir
+                </button>
+                <button onclick="document.getElementById('mistake-prompt-modal').classList.add('hidden'); switchTab('table')" class="flex-1 bg-duoBlue text-white font-display font-black py-3 rounded-[16px] shadow-btn-blue border-b-[4px] border-black/10 duo-pressable text-sm">
+                    Veure Taula
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓ FLOTANT (+XP) -->
+    <div id="floating-notification" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[110] font-display font-black text-5xl pointer-events-none opacity-0 drop-shadow-lg"></div>
+
+    <!-- HEADER SUPERIOR -->
+    <header class="bg-white border-b-2 border-slate-200 sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            
+            <div class="flex items-center gap-3 cursor-pointer group" onclick="switchTab('dashboard'); playSound('pop')">
+                <div class="w-12 h-12 rounded-[16px] bg-duoGreen flex items-center justify-center text-white text-2xl font-black shadow-btn-green border-2 border-black/10 group-hover:scale-105 transition-transform">
+                    AFI
+                </div>
+                <div class="hidden sm:block">
+                    <h1 class="text-xl font-display font-black text-slate-800 leading-none tracking-tight">Fonètica Catalana</h1>
+                    <span class="text-[10px] bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full font-black uppercase shadow-sm">PRO</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4 font-display font-black text-lg">
+                <!-- Vides (Il·limitades en Pro) -->
+                <div class="flex items-center gap-1.5 text-duoRed" title="Vides Il·limitades">
+                    <i class="fa-solid fa-infinity text-2xl"></i>
+                </div>
+                <!-- Ratxa -->
+                <div class="flex items-center gap-1.5 text-duoOrange">
+                    <i class="fa-solid fa-fire text-xl"></i>
+                    <span id="ui-streak">0</span>
+                </div>
+                <!-- XP -->
+                <div class="flex items-center gap-1.5 text-duoBlue">
+                    <i class="fa-solid fa-bolt text-xl"></i>
+                    <span id="ui-xp">0</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NAVEGACIÓ -->
+        <div class="bg-white border-t-2 border-slate-100">
+            <div class="max-w-5xl mx-auto px-2 py-2 flex gap-2 overflow-x-auto scrollbar-none font-display font-bold text-sm">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap active transition-colors">
+                    <i class="fa-solid fa-house text-lg"></i> Inici
+                </button>
+                <button onclick="switchTab('mode1')" id="nav-mode1" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap transition-colors">
+                    <i class="fa-solid fa-ear-listen text-lg"></i> Identifica
+                </button>
+                <button onclick="switchTab('mode2')" id="nav-mode2" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap transition-colors">
+                    <i class="fa-solid fa-keyboard text-lg"></i> Escriu
+                </button>
+                <button onclick="switchTab('timeattack')" id="nav-timeattack" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap transition-colors">
+                    <i class="fa-solid fa-bolt text-lg text-duoOrange"></i> Rellotge
+                </button>
+                <button onclick="switchTab('profile')" id="nav-profile" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap transition-colors">
+                    <i class="fa-solid fa-user text-lg text-duoPurple"></i> Perfil
+                </button>
+                <button onclick="switchTab('table')" id="nav-table" class="nav-btn bg-slate-100 text-slate-500 border-2 border-b-[4px] border-slate-200 duo-pressable px-5 py-2.5 rounded-[16px] flex items-center gap-2 whitespace-nowrap transition-colors">
+                    <i class="fa-solid fa-table-list text-lg"></i> Taula
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 py-8 flex-grow w-full relative">
+
+        <!-- DASHBOARD -->
+        <div id="view-dashboard" class="space-y-8 animate-pop">
+            <div class="bg-white rounded-[32px] p-8 shadow-sm border-[3px] border-slate-200 flex flex-col md:flex-row items-center gap-6 text-center md:text-left relative overflow-hidden">
+                <div class="w-24 h-24 bg-slate-100 rounded-[24px] border-4 border-slate-200 flex items-center justify-center text-5xl text-slate-300">
+                    <i class="fa-solid fa-user-astronaut"></i>
+                </div>
+                <div class="flex-1">
+                    <h2 class="text-4xl font-display font-black text-slate-800" id="dash-welcome">Hola!</h2>
+                    <p class="text-slate-500 font-bold text-lg mt-1">Anem a practicar els fonemes catalans.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Boto Mode 1 -->
+                <button onclick="switchTab('mode1')" class="bg-white rounded-[24px] p-6 border-[3px] border-b-[6px] border-slate-200 hover:border-duoBlue hover:bg-blue-50/50 duo-pressable transition-all flex flex-col items-center text-center group text-slate-700">
+                    <div class="w-20 h-20 rounded-full bg-blue-100 text-duoBlue flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                        <i class="fa-solid fa-ear-listen"></i>
+                    </div>
+                    <h3 class="font-display font-black text-2xl group-hover:text-duoBlue transition-colors">Identifica</h3>
+                    <p class="text-slate-500 font-bold text-sm mt-2">Observa el so i tria les propietats.</p>
+                </button>
+
+                <!-- Boto Mode 2 -->
+                <button onclick="switchTab('mode2')" class="bg-white rounded-[24px] p-6 border-[3px] border-b-[6px] border-slate-200 hover:border-duoPurple hover:bg-purple-50/50 duo-pressable transition-all flex flex-col items-center text-center group text-slate-700">
+                    <div class="w-20 h-20 rounded-full bg-purple-100 text-duoPurple flex items-center justify-center text-4xl mb-4 group-hover:scale-110 transition-transform shadow-sm">
+                        <i class="fa-solid fa-keyboard"></i>
+                    </div>
+                    <h3 class="font-display font-black text-2xl group-hover:text-duoPurple transition-colors">Escriu el So</h3>
+                    <p class="text-slate-500 font-bold text-sm mt-2">Llegeix les propietats i escriu l'AFI.</p>
+                </button>
+            </div>
+            
+            <a href="https://pbfedu.github.io/afi/classic?pro=true" class="block w-full text-center text-slate-400 font-bold text-sm hover:text-slate-600 transition-colors mt-8">
+                <i class="fa-solid fa-clock-rotate-left mr-1"></i> Tornar a la versió Clàssica original
+            </a>
+        </div>
+
+        <!-- MODE 1 -->
+        <div id="view-mode1" class="hidden space-y-6">
+            <div class="bg-duoBlue text-white rounded-[32px] p-10 mb-8 border-b-[8px] border-2 border-black/10 shadow-btn-blue flex flex-col items-center justify-center relative overflow-hidden">
+                <span class="text-sm font-black uppercase tracking-widest opacity-80 mb-2">Identifica aquest so</span>
+                <div id="m1-symbol" class="text-7xl font-display font-black drop-shadow-md">[p]</div>
+                <button onclick="document.getElementById('m1-hint').classList.toggle('hidden'); playSound('pop')" class="mt-4 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full text-sm font-bold transition-colors">
+                    <i class="fa-solid fa-lightbulb text-amber-300"></i> Pista
+                </button>
+                <div id="m1-hint" class="hidden mt-3 font-bold bg-black/20 px-4 py-2 rounded-[16px]">Ex: pal</div>
+            </div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-sm font-black uppercase text-slate-400 mb-3 ml-2">1. Sonoritat</label>
+                    <div id="m1-opt-son" class="grid grid-cols-2 gap-4"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-black uppercase text-slate-400 mb-3 ml-2">2. Mode d'articulació</label>
+                    <div id="m1-opt-mod" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
+                </div>
+                <div>
+                    <label class="block text-sm font-black uppercase text-slate-400 mb-3 ml-2">3. Punt d'articulació</label>
+                    <div id="m1-opt-pun" class="grid grid-cols-2 sm:grid-cols-3 gap-4"></div>
+                </div>
+            </div>
+
+            <div class="pt-6">
+                <button onclick="checkAnswerM1()" class="w-full bg-duoGreen text-white font-display font-black text-2xl py-4 rounded-[24px] shadow-btn-green border-x-2 border-t-2 border-b-[6px] border-black/10 duo-pressable uppercase tracking-wider">
+                    Comprovar
+                </button>
+            </div>
+        </div>
+
+        <!-- MODE 2 -->
+        <div id="view-mode2" class="hidden space-y-8">
+            <div class="bg-white rounded-[32px] p-6 border-[3px] border-slate-200 shadow-sm text-center">
+                <span class="text-sm font-black uppercase text-slate-400 block mb-4">Propietats del fonema</span>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span id="m2-son" class="bg-slate-100 text-duoPurple font-display font-black text-xl px-5 py-3 rounded-[16px] border-2 border-slate-200">Sord</span>
+                    <span id="m2-mod" class="bg-slate-100 text-duoPurple font-display font-black text-xl px-5 py-3 rounded-[16px] border-2 border-slate-200">Oclusiu</span>
+                    <span id="m2-pun" class="bg-slate-100 text-duoPurple font-display font-black text-xl px-5 py-3 rounded-[16px] border-2 border-slate-200">Bilabial</span>
+                </div>
+            </div>
+
+            <div class="max-w-md mx-auto space-y-6">
+                <div class="flex gap-3">
+                    <input type="text" id="m2-input" readonly placeholder="Escriu aquí..." class="w-full text-center text-4xl font-display font-black bg-slate-50 border-[3px] border-slate-300 rounded-[20px] py-4 text-slate-800 outline-none">
+                    <button onclick="document.getElementById('m2-input').value=''; playSound('pop')" class="px-6 bg-slate-200 hover:bg-slate-300 text-slate-500 rounded-[20px] font-black text-2xl transition-colors active:scale-95 border-b-[4px] border-slate-300">
+                        <i class="fa-solid fa-delete-left"></i>
+                    </button>
+                </div>
+
+                <div class="bg-slate-100 p-4 rounded-[24px] border-[3px] border-slate-200 shadow-inner">
+                    <div id="keyboard" class="grid grid-cols-6 gap-2"></div>
+                </div>
+
+                <div class="pt-4">
+                    <button onclick="checkAnswerM2()" class="w-full bg-duoGreen text-white font-display font-black text-2xl py-4 rounded-[24px] shadow-btn-green border-x-2 border-t-2 border-b-[6px] border-black/10 duo-pressable uppercase tracking-wider">
+                        Comprovar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rellotge -->
+        <div id="view-timeattack" class="hidden animate-pop">
+            <div id="ta-home" class="bg-white rounded-[32px] p-10 text-center border-[3px] border-slate-200 shadow-sm space-y-6">
+                <div class="w-28 h-28 bg-orange-100 text-duoOrange rounded-full flex items-center justify-center text-6xl mx-auto shadow-inner border-4 border-orange-200">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h2 class="text-4xl font-display font-black text-slate-800">Mode Rellotge</h2>
+                <p class="text-slate-500 font-bold text-lg max-w-sm mx-auto">
+                    30 segons. <span class="text-duoGreen font-black">+3s</span> per encert, <span class="text-duoRed font-black">-3s</span> per error. Sigues ràpid!
+                </p>
+                <div class="pt-4">
+                    <button onclick="startTA()" class="w-full max-w-xs mx-auto bg-duoOrange text-white font-display font-black text-2xl py-4 rounded-[24px] shadow-btn-orange border-x-2 border-t-2 border-b-[6px] border-black/10 duo-pressable uppercase">
+                        Començar
+                    </button>
+                </div>
+            </div>
+
+            <div id="ta-game" class="hidden space-y-8">
+                <div class="flex justify-between items-center bg-slate-800 text-white rounded-[24px] p-6 shadow-md border-b-[6px] border-slate-900">
+                    <div class="flex items-center gap-4">
+                        <i class="fa-solid fa-stopwatch text-duoOrange text-4xl animate-pulse"></i>
+                        <div>
+                            <span class="text-xs uppercase font-black text-slate-400 block">Temps</span>
+                            <span id="ta-timer" class="text-4xl font-display font-black text-duoOrange">30s</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs uppercase font-black text-slate-400 block">Punts</span>
+                        <span id="ta-score" class="text-4xl font-display font-black text-duoGreen">0</span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-[24px] p-6 border-[3px] border-slate-200 text-center">
+                    <div class="flex flex-wrap justify-center gap-3 font-display font-black text-xl text-slate-700">
+                        <span id="ta-p1" class="bg-slate-100 px-5 py-2 rounded-[16px] border-2 border-slate-200"></span>
+                        <span id="ta-p2" class="bg-slate-100 px-5 py-2 rounded-[16px] border-2 border-slate-200"></span>
+                        <span id="ta-p3" class="bg-slate-100 px-5 py-2 rounded-[16px] border-2 border-slate-200"></span>
+                    </div>
+                </div>
+
+                <div id="ta-grid" class="grid grid-cols-2 gap-4 max-w-md mx-auto"></div>
+            </div>
+
+            <div id="ta-end" class="hidden bg-white rounded-[32px] p-10 text-center border-[3px] border-slate-200 shadow-sm space-y-6">
+                <div class="text-7xl mb-2">🏁</div>
+                <h2 class="text-4xl font-display font-black text-slate-800">Temps Esgotat!</h2>
+                <p class="text-slate-500 font-bold text-xl">Has aconseguit <span id="ta-final" class="text-3xl font-display font-black text-duoOrange mx-1">0</span> punts.</p>
+                <div class="pt-6">
+                    <button onclick="startTA()" class="w-full max-w-xs mx-auto bg-duoBlue text-white font-display font-black text-xl py-4 rounded-[24px] shadow-btn-blue border-x-2 border-t-2 border-b-[6px] border-black/10 duo-pressable uppercase">
+                        Tornar a Jugar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PERFIL I INSÍGNIES -->
+        <div id="view-profile" class="hidden space-y-8 animate-pop">
+            <div class="bg-white rounded-[32px] p-8 shadow-sm border-[3px] border-slate-200 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
+                <div class="w-24 h-24 bg-duoPurple text-white rounded-full flex items-center justify-center text-5xl shadow-btn-purple border-4 border-purple-200">
+                    <i class="fa-solid fa-user-ninja"></i>
+                </div>
+                <div class="text-center md:text-left flex-1">
+                    <h2 class="text-3xl font-display font-black text-slate-800" id="prof-name">Estudiant</h2>
+                    <p class="text-slate-500 font-bold text-base mt-1" id="prof-level">Estudiant 2n de Batxillerat</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                        <div class="bg-slate-50 px-4 py-2 rounded-[16px] border-2 border-slate-200">
+                            <span class="text-xs text-slate-400 font-black uppercase block">XP Total</span>
+                            <span class="text-xl font-display font-black text-duoBlue" id="prof-xp">0</span>
+                        </div>
+                        <div class="bg-slate-50 px-4 py-2 rounded-[16px] border-2 border-slate-200">
+                            <span class="text-xs text-slate-400 font-black uppercase block">Màx Ratxa</span>
+                            <span class="text-xl font-display font-black text-duoOrange" id="prof-max-streak">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-display font-black text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-award text-amber-400"></i> Els teus Assoliments
+                </h3>
+                <div id="badges-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <!-- Es renderitzen via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAULA -->
+        <div id="view-table" class="hidden bg-white rounded-[32px] p-6 sm:p-8 shadow-sm border-[3px] border-slate-200 animate-pop">
+            <h2 class="text-2xl font-display font-black text-slate-800 mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-book-open text-duoPurple"></i> Taula de Sons
+            </h2>
+            
+            <div class="relative w-full mb-6">
+                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="table-search" oninput="filterReferenceTable()" placeholder="Cerca per símbol, mode, exemple..." class="w-full pl-11 pr-4 py-3 bg-slate-50 border-[3px] border-slate-200 rounded-[20px] font-bold text-slate-700 focus:border-duoBlue outline-none transition-colors">
+            </div>
+
+            <div class="overflow-x-auto rounded-[20px] border-2 border-slate-200">
+                <table class="w-full text-left border-collapse bg-white whitespace-nowrap">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-500 text-xs uppercase font-black border-b-2 border-slate-200">
+                            <th class="p-4">IPA</th>
+                            <th class="p-4">Sonoritat</th>
+                            <th class="p-4">Mode</th>
+                            <th class="p-4">Punt</th>
+                            <th class="p-4">Exemples</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body" class="divide-y-2 divide-slate-100 text-sm font-bold text-slate-700"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BOTTOM SHEET (DUOLINGO STYLE FEEDBACK) -->
+    <div id="bottom-sheet" class="bottom-sheet fixed bottom-0 left-0 right-0 z-50 p-6 sm:p-8 rounded-t-[32px] border-t-2 bg-duoBgSuccess border-duoGreen">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4 w-full">
+                <div id="bs-icon-bg" class="w-16 h-16 rounded-full flex items-center justify-center text-4xl shrink-0 bg-white border-2 text-duoGreen border-emerald-100 shadow-sm">
+                    <i id="bs-icon" class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                    <h3 id="bs-title" class="font-display font-black text-3xl text-duoTextSuccess">Genial!</h3>
+                    <p id="bs-msg" class="text-lg font-bold text-emerald-700 mt-1">Ets un autèntic mestre.</p>
+                </div>
+            </div>
+            <button id="bs-btn" onclick="nextQuestion()" class="w-full sm:w-auto min-w-[200px] font-display font-black text-xl py-4 px-8 rounded-[24px] shadow-btn-green border-x-2 border-t-2 border-b-[6px] border-black/10 bg-duoGreen text-white uppercase tracking-wider duo-pressable active:translate-y-1">
+                Continuar
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO SCRIPT -->
+    <script>
+        const playSound = (type) => {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator(), gain = ctx.createGain();
+                osc.connect(gain); gain.connect(ctx.destination);
+                const now = ctx.currentTime;
+                
+                if (type === 'pop') {
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc.start(now); osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(783.99, now + 0.1); osc.frequency.setValueAtTime(1046.50, now + 0.2);
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now); osc.stop(now + 0.4);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(240, now); osc.frequency.exponentialRampToValueAtTime(120, now + 0.3);
+                    gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now); osc.stop(now + 0.3);
+                } else if (type === 'fanfare') {
+                    osc.type = 'triangle'; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => osc.frequency.setValueAtTime(f, now + i*0.1));
+                    gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    osc.start(now); osc.stop(now + 0.6);
+                }
+            } catch (e) {}
+        };
+        const triggerConfetti = () => { if(window.confetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }}); };
+    </script>
+
+    <!-- MAIN LOGIC -->
+    <script>
+        const consonants = [
+            { symbol: '[p]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Bilabial', examples: 'pal' },
+            { symbol: '[b]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Bilabial', examples: 'bata' },
+            { symbol: '[β]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Bilabial', examples: 'sabata, sobre' },
+            { symbol: '[m]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Bilabial', examples: 'mà' },
+            { symbol: '[f]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Labiodental', examples: 'foc' },
+            { symbol: '[v]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Labiodental', examples: 'val' },
+            { symbol: '[ɱ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Labiodental', examples: 'inflar' },
+            { symbol: '[t]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Dental', examples: 'toc' },
+            { symbol: '[d]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Dental', examples: 'dau' },
+            { symbol: '[ð]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Dental', examples: 'odi, quadre' },
+            { symbol: '[s]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Alveolar', examples: 'sac, cel' },
+            { symbol: '[z]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Alveolar', examples: 'casa, zero' },
+            { symbol: '[ts]', sonoritat: 'Sord', mode: 'Africat', punt: 'Alveolar', examples: 'potser' },
+            { symbol: '[dz]', sonoritat: 'Sonor', mode: 'Africat', punt: 'Alveolar', examples: 'dotze' },
+            { symbol: '[l]', sonoritat: 'Sonor', mode: 'Lateral', punt: 'Alveolar', examples: 'litre' },
+            { symbol: '[ɾ]', sonoritat: 'Sonor', mode: 'Bategant', punt: 'Alveolar', examples: 'cara' },
+            { symbol: '[r]', sonoritat: 'Sonor', mode: 'Vibrant', punt: 'Alveolar', examples: 'rosa, arròs' },
+            { symbol: '[n]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Alveolar', examples: 'nen' },
+            { symbol: '[ʃ]', sonoritat: 'Sord', mode: 'Fricatiu', punt: 'Palatal', examples: 'peix, xec' },
+            { symbol: '[ʒ]', sonoritat: 'Sonor', mode: 'Fricatiu', punt: 'Palatal', examples: 'joc, gent' },
+            { symbol: '[tʃ]', sonoritat: 'Sord', mode: 'Africat', punt: 'Palatal', examples: 'cotxo, raig' },
+            { symbol: '[dʒ]', sonoritat: 'Sonor', mode: 'Africat', punt: 'Palatal', examples: 'formatge' },
+            { symbol: '[j]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Palatal', examples: 'iode, mai' },
+            { symbol: '[ʎ]', sonoritat: 'Sonor', mode: 'Lateral', punt: 'Palatal', examples: 'llac, coll' },
+            { symbol: '[ɲ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Palatal', examples: 'any, bunyol' },
+            { symbol: '[k]', sonoritat: 'Sord', mode: 'Oclusiu', punt: 'Velar', examples: 'casa, queixa' },
+            { symbol: '[g]', sonoritat: 'Sonor', mode: 'Oclusiu', punt: 'Velar', examples: 'gota, guix' },
+            { symbol: '[ɣ]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Velar', examples: 'farigola' },
+            { symbol: '[w]', sonoritat: 'Sonor', mode: 'Aproximant', punt: 'Velar', examples: 'teula, quadre' },
+            { symbol: '[ŋ]', sonoritat: 'Sonor', mode: 'Nasal', punt: 'Velar', examples: 'sang, angle' }
+        ];
+
+        const motives = ["Brillant!", "Ho estàs petant!", "Quina memòria!", "La fonètica és teva!", "Ets imparable!", "Molt bona resposta!", "Súper!", "Fantàstic!"];
+
+        let db = {
+            name: '', correct: 0, wrong: 0, streak: 0, maxStreak: 0, xp: 0, maxTimeAttack: 0, sessionErrors: 0, badges: []
+        };
+        
+        let currentMode = null, m1Item = null, m2Item = null;
+        let m1Sel = { son: null, mod: null, pun: null };
+        let currentView = 'dashboard';
+
+        // STARTUP
+        window.onload = () => {
+            loadData();
+            if (!db.name) document.getElementById('name-modal').classList.remove('hidden');
+            else document.getElementById('dash-welcome').innerText = `Hola ${db.name}!`;
+
+            initM1(); initM2(); initTable(); updateUI();
+        };
+
+        function loadData() { const saved = localStorage.getItem('afi_db_pro_v3'); if(saved) db = {...db, ...JSON.parse(saved)}; }
+        function saveData() { localStorage.setItem('afi_db_pro_v3', JSON.stringify(db)); updateUI(); }
+        
+        function saveName() {
+            playSound('pop');
+            const n = document.getElementById('name-input').value.trim();
+            if(!n) return;
+            db.name = n; saveData();
+            document.getElementById('name-modal').classList.add('hidden');
+            document.getElementById('dash-welcome').innerText = `Hola ${db.name}!`;
+        }
+
+        // UI UPDATES
+        function updateUI() {
+            document.getElementById('ui-streak').innerText = db.streak;
+            document.getElementById('ui-xp').innerText = db.xp;
+            
+            // Profile Update
+            document.getElementById('prof-name').innerText = db.name || 'Estudiant';
+            document.getElementById('prof-xp').innerText = db.xp;
+            document.getElementById('prof-max-streak').innerText = db.maxStreak;
+            
+            const badgesDef = [
+                {id: 'b1', name: 'Primer Pas', icon: 'fa-seedling', req: db.correct >= 1, desc: 'Aconsegueix 1 encert.'},
+                {id: 'b2', name: 'Foc a tope', icon: 'fa-fire', req: db.maxStreak >= 5, desc: 'Aconsegueix una ratxa de 5.'},
+                {id: 'b3', name: 'Mestre', icon: 'fa-crown', req: db.xp >= 100, desc: 'Acumula 100 punts de XP.'},
+                {id: 'b4', name: 'Precisió', icon: 'fa-bullseye', req: db.correct >= 20 && (db.correct/(db.correct+db.wrong))>0.8, desc: '20 encerts i +80% precisió.'},
+                {id: 'b5', name: 'Invencible', icon: 'fa-shield-halved', req: db.maxStreak >= 15, desc: 'Aconsegueix una ratxa de 15.'},
+                {id: 'b6', name: 'El Raig', icon: 'fa-bolt', req: db.maxTimeAttack >= 15, desc: 'Fes 15 punts al mode Rellotge.'}
+            ];
+            
+            let html = '';
+            badgesDef.forEach(b => {
+                if(b.req && !db.badges.includes(b.id)) { db.badges.push(b.id); playSound('fanfare'); triggerConfetti(); }
+                let isU = db.badges.includes(b.id);
+                html += `
+                    <div class="group relative p-4 rounded-[20px] text-center border-[3px] transition-all ${isU ? 'bg-amber-100 border-amber-300 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-300 cursor-help'}">
+                        <i class="fa-solid ${b.icon} text-3xl mb-2 ${isU ? 'text-amber-500' : 'text-slate-300'}"></i>
+                        <h4 class="font-display font-black text-sm leading-tight">${b.name}</h4>
+                        
+                        <!-- Tooltip -->
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-slate-800 text-white font-sans font-bold text-xs rounded-[12px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none shadow-xl text-center">
+                            ${b.desc}
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('badges-grid').innerHTML = html;
+        }
+
+        // TABS
+        function switchTab(t) {
+            playSound('pop'); currentView = t;
+            ['dashboard','mode1','mode2','timeattack','profile','table'].forEach(id => {
+                document.getElementById('view-'+id).classList.add('hidden');
+                let btn = document.getElementById('nav-'+id);
+                if(btn) { btn.classList.remove('active','bg-slate-200'); btn.classList.add('bg-slate-100'); }
+            });
+            document.getElementById('view-'+t).classList.remove('hidden');
+            let aBtn = document.getElementById('nav-'+t);
+            if(aBtn) { aBtn.classList.add('active','bg-slate-200'); aBtn.classList.remove('bg-slate-100'); }
+
+            if(t==='mode1') buildM1();
+            if(t==='mode2') buildM2();
+            if(t!=='timeattack' && taTimer) { clearInterval(taTimer); taTimer=null; }
+            document.getElementById('bottom-sheet').classList.remove('open');
+        }
+
+        // GAME LOGIC
+        function triggerResult(isCorrect, realAnswer) {
+            const bs = document.getElementById('bottom-sheet');
+            const bg = document.getElementById('bs-icon-bg');
+            const ic = document.getElementById('bs-icon');
+            const tit = document.getElementById('bs-title');
+            const msg = document.getElementById('bs-msg');
+            const btn = document.getElementById('bs-btn');
+
+            if(isCorrect) {
+                playSound('success'); db.correct++; db.streak++; db.xp += 10; db.sessionErrors = 0;
+                if(db.streak > db.maxStreak) db.maxStreak = db.streak;
+                document.getElementById('app-body').classList.add('flash-green');
+                setTimeout(()=>document.getElementById('app-body').classList.remove('flash-green'),400);
+                
+                bs.className = "bottom-sheet open fixed bottom-0 left-0 right-0 z-50 p-6 sm:p-8 rounded-t-[32px] border-t-2 bg-duoBgSuccess border-duoGreen";
+                bg.className = "w-16 h-16 rounded-full flex items-center justify-center text-4xl shrink-0 bg-white border-2 text-duoGreen border-emerald-100 shadow-sm";
+                ic.className = "fa-solid fa-check";
+                tit.className = "font-display font-black text-3xl text-duoTextSuccess";
+                msg.className = "text-lg font-bold text-emerald-700 mt-1";
+                btn.className = "w-full sm:w-auto min-w-[200px] font-display font-black text-xl py-4 px-8 rounded-[24px] shadow-btn-green border-x-2 border-t-2 border-b-[6px] border-black/10 bg-duoGreen text-white uppercase tracking-wider duo-pressable active:translate-y-1";
+                
+                tit.innerText = motives[Math.floor(Math.random()*motives.length)];
+                msg.innerText = "+10 XP";
+                showFloat('+10 XP', 'text-duoGreen');
+            } else {
+                playSound('error'); db.wrong++; db.streak = 0; db.sessionErrors++;
+                document.getElementById('app-body').classList.add('flash-red', 'screen-shake');
+                setTimeout(()=>document.getElementById('app-body').classList.remove('flash-red', 'screen-shake'),400);
+
+                bs.className = "bottom-sheet open fixed bottom-0 left-0 right-0 z-50 p-6 sm:p-8 rounded-t-[32px] border-t-2 bg-duoBgError border-duoRed";
+                bg.className = "w-16 h-16 rounded-full flex items-center justify-center text-4xl shrink-0 bg-white border-2 text-duoRed border-rose-100 shadow-sm";
+                ic.className = "fa-solid fa-xmark";
+                tit.className = "font-display font-black text-3xl text-duoTextError";
+                msg.className = "text-lg font-bold text-rose-700 mt-1";
+                btn.className = "w-full sm:w-auto min-w-[200px] font-display font-black text-xl py-4 px-8 rounded-[24px] shadow-btn-red border-x-2 border-t-2 border-b-[6px] border-black/10 bg-duoRed text-white uppercase tracking-wider duo-pressable active:translate-y-1";
+                
+                tit.innerText = "Incorrecte";
+                msg.innerText = `La resposta era: ${realAnswer}`;
+
+                // Mistake prompt if failing repeatedly
+                if (db.sessionErrors >= 3) {
+                    db.sessionErrors = 0;
+                    setTimeout(() => document.getElementById('mistake-prompt-modal').classList.remove('hidden'), 500);
+                }
+            }
+            saveData();
+        }
+
+        function showFloat(text, col) {
+            const el = document.getElementById('floating-notification');
+            el.innerText = text; el.className = `fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[110] font-display font-black text-5xl pointer-events-none drop-shadow-lg animate-float-up ${col}`;
+            setTimeout(()=> { el.classList.remove('animate-float-up'); el.style.opacity = '0'; }, 1000);
+        }
+
+        function nextQuestion() {
+            playSound('pop');
+            document.getElementById('bottom-sheet').classList.remove('open');
+            if(currentMode === 'm1') buildM1();
+            if(currentMode === 'm2') buildM2();
+        }
+
+        // INIT MODE 1
+        function initM1() {
+            const render = (id, list, cat) => {
+                const c = document.getElementById(id); c.innerHTML='';
+                list.forEach(v => {
+                    let b = document.createElement('button');
+                    b.className = 'w-full p-4 rounded-[16px] font-display font-black text-sm sm:text-base border-2 border-b-[4px] border-slate-200 text-slate-500 bg-white hover:bg-slate-50 duo-pressable transition-all';
+                    b.innerText = v;
+                    b.onclick = () => {
+                        playSound('pop'); m1Sel[cat] = v;
+                        Array.from(c.children).forEach(ch => ch.className = 'w-full p-4 rounded-[16px] font-display font-black text-sm sm:text-base border-2 border-b-[4px] border-slate-200 text-slate-500 bg-white hover:bg-slate-50 duo-pressable transition-all');
+                        b.className = 'w-full p-4 rounded-[16px] font-display font-black text-sm sm:text-base border-2 border-b-[4px] border-duoBlue bg-blue-50 text-duoBlue transition-all transform translate-y-1';
+                    };
+                    c.appendChild(b);
+                });
+            };
+            render('m1-opt-son', ['Sord','Sonor'], 'son');
+            render('m1-opt-mod', ['Oclusiu','Fricatiu','Africat','Aproximant','Lateral','Bategant','Vibrant','Nasal'], 'mod');
+            render('m1-opt-pun', ['Bilabial','Labiodental','Dental','Alveolar','Palatal','Velar'], 'pun');
+        }
+        function buildM1() {
+            currentMode = 'm1'; m1Sel = {son:null, mod:null, pun:null};
+            m1Item = consonants[Math.floor(Math.random()*consonants.length)];
+            document.getElementById('m1-symbol').innerText = m1Item.symbol;
+            document.getElementById('m1-hint').classList.add('hidden');
+            ['m1-opt-son','m1-opt-mod','m1-opt-pun'].forEach(id => {
+                Array.from(document.getElementById(id).children).forEach(ch => ch.className = 'w-full p-4 rounded-[16px] font-display font-black text-sm sm:text-base border-2 border-b-[4px] border-slate-200 text-slate-500 bg-white hover:bg-slate-50 duo-pressable transition-all');
+            });
+        }
+        function checkAnswerM1() {
+            if(!m1Sel.son || !m1Sel.mod || !m1Sel.pun) return;
+            let ok = (m1Sel.son===m1Item.sonoritat && m1Sel.mod===m1Item.mode && m1Sel.pun===m1Item.punt);
+            triggerResult(ok, `${m1Item.sonoritat}, ${m1Item.mode}, ${m1Item.punt}`);
+        }
+
+        // INIT MODE 2
+        function initM2() {
+            const kb = document.getElementById('keyboard'); kb.innerHTML='';
+            ['[', ']', 'p', 'b', 'β', 'm', 'f', 'v', 'ɱ', 't', 'd', 'ð', 's', 'z', 'ts', 'dz', 'l', 'ɾ', 'r', 'n', 'ʃ', 'ʒ', 'tʃ', 'dʒ', 'j', 'ʎ', 'ɲ', 'k', 'g', 'ɣ', 'w', 'ŋ'].forEach(k => {
+                let b = document.createElement('button');
+                b.className = 'bg-white text-slate-700 border-2 border-b-[4px] border-slate-200 rounded-[16px] py-3 font-display font-black text-xl hover:bg-slate-50 active:translate-y-1 active:border-b-2 transition-all';
+                b.innerText = k;
+                b.onclick = () => { playSound('pop'); document.getElementById('m2-input').value += k; }
+                kb.appendChild(b);
+            });
+        }
+        function buildM2() {
+            currentMode = 'm2'; document.getElementById('m2-input').value='';
+            m2Item = consonants[Math.floor(Math.random()*consonants.length)];
+            document.getElementById('m2-son').innerText = m2Item.sonoritat;
+            document.getElementById('m2-mod').innerText = m2Item.mode;
+            document.getElementById('m2-pun').innerText = m2Item.punt;
+        }
+        function checkAnswerM2() {
+            let v = document.getElementById('m2-input').value.trim(); if(!v) return;
+            triggerResult(v === m2Item.symbol, m2Item.symbol);
+        }
+
+        // TIME ATTACK
+        let taTimer, taTimeLeft, taScore, taItem;
+        function startTA() {
+            playSound('pop'); currentMode = 'ta'; taTimeLeft = 30; taScore = 0;
+            document.getElementById('ta-home').classList.add('hidden');
+            document.getElementById('ta-end').classList.add('hidden');
+            document.getElementById('ta-game').classList.remove('hidden');
+            updateTA(); nextTA();
+            taTimer = setInterval(() => {
+                taTimeLeft--; updateTA();
+                if(taTimeLeft<=0) {
+                    clearInterval(taTimer); playSound('fanfare');
+                    document.getElementById('ta-game').classList.add('hidden');
+                    document.getElementById('ta-end').classList.remove('hidden');
+                    document.getElementById('ta-final').innerText = taScore;
+                    
+                    if(taScore > db.maxTimeAttack) db.maxTimeAttack = taScore;
+                    db.xp += taScore; saveData();
+                }
+            }, 1000);
+        }
+        function updateTA() {
+            document.getElementById('ta-timer').innerText = Math.max(0, taTimeLeft)+'s';
+            document.getElementById('ta-score').innerText = taScore;
+        }
+        function nextTA() {
+            taItem = consonants[Math.floor(Math.random()*consonants.length)];
+            document.getElementById('ta-p1').innerText = taItem.sonoritat;
+            document.getElementById('ta-p2').innerText = taItem.mode;
+            document.getElementById('ta-p3').innerText = taItem.punt;
+            
+            let ops = [taItem.symbol];
+            while(ops.length<4) { let r = consonants[Math.floor(Math.random()*consonants.length)].symbol; if(!ops.includes(r)) ops.push(r); }
+            ops.sort(()=>Math.random()-0.5);
+            const grid = document.getElementById('ta-grid'); grid.innerHTML='';
+            ops.forEach(o => {
+                let b = document.createElement('button');
+                b.className = 'bg-white hover:bg-orange-50 text-slate-700 hover:text-duoOrange font-display font-black text-4xl py-8 rounded-[24px] border-2 border-b-[6px] border-slate-200 hover:border-duoOrange active:translate-y-1 active:border-b-2 transition-all';
+                b.innerText = o;
+                b.onclick = () => {
+                    if(o===taItem.symbol) {
+                        playSound('success'); taScore++; taTimeLeft+=3; showFloat('+3s', 'text-duoGreen');
+                        document.getElementById('app-body').classList.add('flash-green'); setTimeout(()=>document.getElementById('app-body').classList.remove('flash-green'), 200);
+                    } else {
+                        playSound('error'); taTimeLeft=Math.max(0, taTimeLeft-3); showFloat('-3s', 'text-duoRed');
+                        document.getElementById('app-body').classList.add('flash-red', 'screen-shake'); setTimeout(()=>document.getElementById('app-body').classList.remove('flash-red', 'screen-shake'), 200);
+                    }
+                    updateTA(); if(taTimeLeft>0) nextTA();
+                };
+                grid.appendChild(b);
+            });
+        }
+
+        // TAULA
+        function initTable() { renderTable(consonants); }
+        function renderTable(data) {
+            const tb = document.getElementById('table-body'); tb.innerHTML='';
+            data.forEach(i => {
+                let tr = document.createElement('tr'); tr.className = 'hover:bg-slate-50 transition-colors';
+                tr.innerHTML = `
+                    <td class="p-4 font-display font-black text-duoBlue text-xl">${i.symbol}</td>
+                    <td class="p-4"><span class="px-3 py-1 rounded-[12px] text-xs font-black uppercase ${i.sonoritat==='Sord'?'bg-amber-100 text-amber-700':'bg-purple-100 text-duoPurple'}">${i.sonoritat}</span></td>
+                    <td class="p-4">${i.mode}</td><td class="p-4">${i.punt}</td><td class="p-4 text-slate-400 font-normal">${i.examples}</td>`;
+                tb.appendChild(tr);
+            });
+        }
+        function filterReferenceTable() {
+            let q = document.getElementById('table-search').value.toLowerCase().trim();
+            // Evitar caràcters d'accentuació per fer la cerca més fàcil
+            const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+            const queryNorm = normalize(q);
+
+            renderTable(consonants.filter(c => 
+                normalize(c.symbol).includes(queryNorm) || 
+                normalize(c.examples).includes(queryNorm) || 
+                normalize(c.mode).includes(queryNorm) || 
+                normalize(c.punt).includes(queryNorm)
+            ));
+        }
+    </script>
+</body>
+</html>
